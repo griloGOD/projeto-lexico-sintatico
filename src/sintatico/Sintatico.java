@@ -21,48 +21,54 @@ public class Sintatico{
     }
 
     //<programa> ::= program id {A01} ; <corpo> • {A45}
-    public void programa(){
-        if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("program")) {
+public void programa(){
+    if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("program")) {
+        token = lexico.nextToken();
+        if (token.getClasse() == Classe.indentificador) {
             token = lexico.nextToken();
-            if (token.getClasse() == Classe.indentificador) {
+            // {A01} -> Ação associada à declaração do programa, caso seja necessário
+            if (token.getClasse() == Classe.pontoEVirgula) {
                 token = lexico.nextToken();
-                // {A01}
-                if (token.getClasse() == Classe.pontoEVirgula) {
+                corpo();
+                if (token.getClasse() == Classe.ponto) {
                     token = lexico.nextToken();
-                    corpo();
-                    if (token.getClasse() == Classe.ponto) {
-                        token = lexico.nextToken();
-                        // {A45}
-                    } else{
-                        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou ponto final no programa (.)");
+                    // {A45} -> Ação associada ao final do programa, caso seja necessário
+                    if (token.getClasse() != Classe.EOF) {
+                        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: o programa deve terminar logo após o ponto final (EOF esperado).");
                     }
                 } else{
-                    System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou ponto e vírgula ( ; ) depois do nome do programa");
+                    System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou ponto final no programa (.)");
                 }
             } else{
-                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou po nome do programa");
-            }            
-        }else{
-            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou começar o programa com PROGRAM");
+                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou ponto e vírgula ( ; ) depois do nome do programa");
+            }
+        } else{
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou o nome do programa");
         }
+    } else{
+        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou começar o programa com PROGRAM");
     }
+}
+
     // <corpo> ::= <declara> <rotina> {A44} begin <sentencas> end {A46}
     public void corpo(){
-        declara();
-        rotina();
-        // {A44}
+        declara();  // Declarações de variáveis
+        rotina();   // Declarações de rotinas (procedimentos ou funções)
+        // {A44} -> Ação associada ao corpo do programa
         if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("begin")) {
             token = lexico.nextToken();
-            sentencas();
-            if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("end")){
+            sentencas();  // Processa sentenças entre begin e end
+            if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("end")) {
                 token = lexico.nextToken();
-            }else{
-                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou terminar o corpo doprograma com END");
+                // {A46} -> Ação associada ao final do bloco "begin...end"
+            } else{
+                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou terminar o corpo do programa com END");
             }
-        }else{
+        } else{
             System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou começar o corpo do programa com BEGIN");
         }
     }
+    
 
     //<declara> ::= var <dvar> <mais_dc> | ε
     public void declara(){
