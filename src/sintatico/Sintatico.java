@@ -34,19 +34,19 @@ public void programa(){
                     token = lexico.nextToken();
                     // {A45} -> Ação associada ao final do programa, caso seja necessário
                     if (token.getClasse() != Classe.EOF) {
-                        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: o programa deve terminar logo após o ponto final (EOF esperado).");
+                        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: o programa deve terminar logo após o ponto final (EOF esperado).");
                     }
                 } else{
-                    System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou ponto final no programa (.)");
+                    System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou ponto final no programa (.)");
                 }
             } else{
-                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou ponto e vírgula ( ; ) depois do nome do programa");
+                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou ponto e vírgula ( ; ) depois do nome do programa");
             }
         } else{
-            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou o nome do programa");
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou o nome do programa");
         }
     } else{
-        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou começar o programa com PROGRAM");
+        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou começar o programa com PROGRAM");
     }
 }
 
@@ -62,10 +62,10 @@ public void programa(){
                 token = lexico.nextToken();
                 // {A46} -> Ação associada ao final do bloco "begin...end"
             } else{
-                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou terminar o corpo do programa com END");
+                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(corpo) Erro sintático: faltou terminar o corpo do programa com END");
             }
         } else{
-            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou começar o corpo do programa com BEGIN");
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(corpo) Erro sintático: faltou começar o corpo do programa com BEGIN");
         }
     }
     
@@ -85,7 +85,7 @@ public void programa(){
             token = lexico.nextToken();
             cont_dc();
         } else{
-            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou ponto e virgula (;) no final de uma declaração de variáveis");
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(mais_dc) Erro sintático: faltou ponto e virgula (;) no final de uma declaração de variáveis");
         }
     }
 
@@ -104,17 +104,17 @@ public void programa(){
             token = lexico.nextToken();
             tipo_var();
         } else{
-            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou dois pontos (:) no final do nome do programa");
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(dvar) Erro sintático: faltou dois pontos (:) após as variáveis");
         }
     }
 
     //<tipo_var> ::= integer
     public void tipo_var(){
-        if (token.getClasse() == Classe.numeroInteiro) {
-            token = lexico.nextToken();
-            //{A02}
-        }else{
-            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou um numero inteiro no programa");
+        if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("integer")) {
+            token = lexico.nextToken();  // Avança para o próximo token
+            // {A02}
+        } else {
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(tipo_var) Erro sintático: esperado 'integer' como tipo de variável");
         }
     }
 
@@ -125,7 +125,7 @@ public void programa(){
             // {A03}
             mais_var();
         }else{
-            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou o nome do programa");
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(variaveis) Erro sintático: esperado identificador de variável");
         } 
     }
 
@@ -139,13 +139,13 @@ public void programa(){
 
     //<rotina> ::= <procedimento> | <funcao> | ε
     public void rotina(){
-        if(token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("procedure")){
+        if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("procedure")){
             procedimento();
-        }
-        if(token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("function")){
+        } else if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("function")){
             funcao();
         }
     }
+    
     //<procedimento> ::= procedure id {A04} <parametros> {A48}; <corpo> {A56} ; <rotina>
     public void procedimento(){
         if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("procedure")) {
@@ -153,30 +153,102 @@ public void programa(){
             if (token.getClasse() == Classe.indentificador) {
                 token = lexico.nextToken();
                 // {A04}
-                    parametros();
-                    if (token.getClasse() == Classe.pontoEVirgula) {
+                parametros();
+                if (token.getClasse() == Classe.pontoEVirgula) {
+                    token = lexico.nextToken();
+                    // {A48}
+                    corpo();
+                    //{A56}
+                    if (token.getClasse() == Classe.pontoEVirgula){
                         token = lexico.nextToken();
-                        // {A48}
-                        corpo();
-                        //{A56}
-                        if (token.getClasse() == Classe.pontoEVirgula){
-                            token = lexico.nextToken();
-                            rotina();
-                        }else{
-                            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou ponto e vírgula ( ; ) depois do nome do programa");
-                        }
-                    } else{
-                        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou ponto final no programa (.)");
+                        rotina();
+                    }else{
+                        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(procedimento) Erro sintático: faltou ponto e vírgula (;) após o corpo do procedimento");
                     }
                 } else{
-                    System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou ponto e vírgula ( ; ) depois do nome do programa");
+                    System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(procedimento) Erro sintático: faltou ponto e vírgula (;) após os parâmetros do procedimento");
                 }
             } else{
-                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou po nome do programa");
-            }  
+                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(procedimento) Erro sintático: faltou identificador do procedimento");
+            }
+        } else{
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(procedimento) Erro sintático: faltou começar o procedimento com a palavra reservada PROCEDURE");
+        }  
     }
 
-    public void funcao(){}
-    public void parametros(){}
+    // <funcao> ::= function id {A05} <parametros> {A48} : <tipo_funcao> {A47} ; <corpo> {A56} ; <rotina>
+    public void funcao(){
+        if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("function")) {
+            token = lexico.nextToken();
+            if (token.getClasse() == Classe.indentificador) {
+                token = lexico.nextToken();
+                // {A05}
+                parametros();
+                if (token.getClasse() == Classe.doisPontos) {
+                    token = lexico.nextToken();
+                    tipo_funcao(); // Definimos o tipo da função
+                    // {A47}
+                    if (token.getClasse() == Classe.pontoEVirgula) {
+                        token = lexico.nextToken();
+                        corpo();  // Processa o corpo da função
+                        // {A56}
+                        if (token.getClasse() == Classe.pontoEVirgula){
+                            token = lexico.nextToken();
+                            rotina();  // Chama rotina para funções encadeadas
+                        } else {
+                            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(funcao) Erro sintático: faltou ponto e vírgula ( ; ) após a função");
+                        }
+                    } else {
+                        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(funcao) Erro sintático: faltou ponto e vírgula ( ; ) após o cabeçalho da função");
+                    }
+                } else {
+                    System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(funcao) Erro sintático: faltou dois pontos ( : ) para o tipo de retorno da função");
+                }
+            } else {
+                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(funcao) Erro sintático: faltou o nome da função");
+            }
+        }
+    }
+
+    //<parametros> ::= ( <lista_parametros> ) | ε
+    public void parametros(){
+        if (token.getClasse() == Classe.parentesesEsquerdo) {
+            token = lexico.nextToken();
+            lista_parametros();
+            if (token.getClasse() == Classe.parentesesDireito) {
+                token = lexico.nextToken();
+            } else {
+                System.err.println(token.getLinha() + "," + token.getColuna() + " - (parametros) Erro sintático: esperado fechamento do parênteses ')'");
+            }
+        }
+    }
+    
+
+    // <lista_parametros> ::= <lista_id> : <tipo_var> {A06} <cont_lista_par>
+    public void lista_parametros() {
+        lista_id();
+        if (token.getClasse() == Classe.doisPontos) {
+            token = lexico.nextToken();
+            tipo_var();  // Usa o tipo_var já definido
+            // {A06} - Ação semântica pode ser inserida aqui
+            cont_lista_par();
+        } else {
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou dois pontos ( : ) após os identificadores de parâmetros");
+        }
+    }
+ 
+    public void cont_lista_par(){}
+    public void lista_id(){}
+    
+    // <tipo_funcao> ::= integer
+    public void tipo_funcao() {
+        if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("integer")) {
+            token = lexico.nextToken();
+            // {A47} - Ação semântica pode ser adicionada aqui
+        } else {
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: tipo de função inválido, esperado 'integer'");
+        }
+    }
+
     public void sentencas(){}
 }

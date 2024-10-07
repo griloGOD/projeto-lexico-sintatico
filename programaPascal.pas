@@ -1,18 +1,37 @@
 { Programa que calcula o salario de funcionarios }
-Program CalcularSalario;
+program CalcularSalario;
 
-Var
-    Salario, HorasTrabalhadas, ValorPorHora: integer;  { Declaração de variáveis }
+var
+    x, y: integer;
 
-Begin
-    { Corpo do programa principal }
-    writeln('Digite o numero de horas trabalhadas:');
-    read(HorasTrabalhadas);
-    writeln('Digite o valor por hora:');
-    read(ValorPorHora);
-    Salario := HorasTrabalhadas * ValorPorHora;  { Cálculo do salário }
-    writeln('O salario calculado é: ', Salario);
-End.
+procedure CalcularSalario;
+
+
+
+begin
+    
+    
+end.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -51,4 +70,4 @@ Begin
     begin
         writeln('Um dos valores não é positivo');
     end;
-End.}
+End.
