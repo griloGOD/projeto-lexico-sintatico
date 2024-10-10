@@ -5,12 +5,12 @@ var
     x, y: integer;
 
 procedure CalcularSalario;
-
-
+begin
+    write(string);
+end;  { <- Ponto e vírgula adicionado }
 
 begin
-    
-    
+    read(CalcularSalario);
 end.
 
 
@@ -70,4 +70,4 @@ Begin
     begin
         writeln('Um dos valores não é positivo');
     end;
-End.
+End.}
