@@ -98,7 +98,7 @@ public class Lexico {
                     caractere = proximoChar();   
                 }
 
-                token.setClasse(Classe.indentificador);
+                token.setClasse(Classe.identificador);
                 token.setValor(new Valor(lexema.toString()));
 
                 if(palavrasReservadas.contains(lexema.toString().toLowerCase())){

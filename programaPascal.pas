@@ -1,41 +1,3 @@
-{ Programa que calcula o salario de funcionarios }
-program CalcularSalario;
-
-var
-    x, y: integer;
-
-procedure CalcularSalario;
-begin
-    write(string);
-end;  { <- Ponto e vírgula adicionado }
-
-begin
-    read(CalcularSalario);
-end.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{' sdasdAa A '
 Program CalcularSalario;
 Var TempoEmAnos, ValorSalario, a, b, c : Integer; 
 Begin 
@@ -70,4 +32,4 @@ Begin
     begin
         writeln('Um dos valores não é positivo');
     end;
-End.}
+End

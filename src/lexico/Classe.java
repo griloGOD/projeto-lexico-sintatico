@@ -1,7 +1,7 @@
 package lexico;
 
 public enum Classe{
-    indentificador,
+    identificador,
     numeroInteiro,
     palavraReservada,
     operadorSoma, // +

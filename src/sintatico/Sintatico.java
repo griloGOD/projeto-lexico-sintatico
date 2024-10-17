@@ -20,35 +20,35 @@ public class Sintatico{
         programa();
     }
 
-    //<programa> ::= program id {A01} ; <corpo> • {A45}
-public void programa(){
-    if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("program")) {
-        token = lexico.nextToken();
-        if (token.getClasse() == Classe.indentificador) {
+        //<programa> ::= program id {A01} ; <corpo> • {A45}
+    public void programa(){
+        if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("program")) {
             token = lexico.nextToken();
-            // {A01} -> Ação associada à declaração do programa, caso seja necessário
-            if (token.getClasse() == Classe.pontoEVirgula) {
+            if (token.getClasse() == Classe.identificador) {
                 token = lexico.nextToken();
-                corpo();
-                if (token.getClasse() == Classe.ponto) {
+                // {A01} -> Ação associada à declaração do programa, caso seja necessário
+                if (token.getClasse() == Classe.pontoEVirgula) {
                     token = lexico.nextToken();
-                    // {A45} -> Ação associada ao final do programa, caso seja necessário
-                    if (token.getClasse() != Classe.EOF) {
-                        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: o programa deve terminar logo após o ponto final (EOF esperado).");
+                    corpo();
+                    if (token.getClasse() == Classe.ponto) {
+                        token = lexico.nextToken();
+                        // {A45} -> Ação associada ao final do programa, caso seja necessário
+                        if (token.getClasse() != Classe.EOF) {
+                            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: o programa deve terminar logo após o ponto final (EOF esperado).");
+                        }
+                    } else{
+                        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou ponto final no programa (.)");
                     }
                 } else{
-                    System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou ponto final no programa (.)");
+                    System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou ponto e vírgula ( ; ) depois do nome do programa");
                 }
             } else{
-                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou ponto e vírgula ( ; ) depois do nome do programa");
+                System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou o nome do programa");
             }
         } else{
-            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou o nome do programa");
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou começar o programa com PROGRAM");
         }
-    } else{
-        System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(programa) Erro sintático: faltou começar o programa com PROGRAM");
     }
-}
 
     // <corpo> ::= <declara> <rotina> {A44} begin <sentencas> end {A46}
     public void corpo(){
@@ -91,7 +91,7 @@ public void programa(){
 
     //<cont_dc> ::= <dvar> <mais_dc> | ε
     public void cont_dc(){
-        if (token.getClasse() == Classe.indentificador){
+        if (token.getClasse() == Classe.identificador){
             dvar();
             mais_dc();
         }
@@ -120,7 +120,7 @@ public void programa(){
 
     //<variaveis> ::= id {A03} <mais_var>
     public void variaveis(){
-        if (token.getClasse() == Classe.indentificador) {
+        if (token.getClasse() == Classe.identificador) {
             token = lexico.nextToken();
             // {A03}
             mais_var();
@@ -150,7 +150,7 @@ public void programa(){
     public void procedimento(){
         if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("procedure")) {
             token = lexico.nextToken();
-            if (token.getClasse() == Classe.indentificador) {
+            if (token.getClasse() == Classe.identificador) {
                 token = lexico.nextToken();
                 // {A04}
                 parametros();
@@ -177,24 +177,24 @@ public void programa(){
     }
 
     // <funcao> ::= function id {A05} <parametros> {A48} : <tipo_funcao> {A47} ; <corpo> {A56} ; <rotina>
-    public void funcao(){
+    public void funcao() {
         if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("function")) {
             token = lexico.nextToken();
-            if (token.getClasse() == Classe.indentificador) {
+            if (token.getClasse() == Classe.identificador) {
                 token = lexico.nextToken();
                 // {A05}
-                parametros();
+                parametros(); // Pode ser ε
                 if (token.getClasse() == Classe.doisPontos) {
                     token = lexico.nextToken();
                     tipo_funcao(); // Definimos o tipo da função
                     // {A47}
                     if (token.getClasse() == Classe.pontoEVirgula) {
                         token = lexico.nextToken();
-                        corpo();  // Processa o corpo da função
+                        corpo(); // Processa o corpo da função
                         // {A56}
-                        if (token.getClasse() == Classe.pontoEVirgula){
+                        if (token.getClasse() == Classe.pontoEVirgula) {
                             token = lexico.nextToken();
-                            rotina();  // Chama rotina para funções encadeadas
+                            rotina(); // Chama rotina para funções encadeadas
                         } else {
                             System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "(funcao) Erro sintático: faltou ponto e vírgula ( ; ) após a função");
                         }
@@ -210,11 +210,13 @@ public void programa(){
         }
     }
 
-    //<parametros> ::= ( <lista_parametros> ) | ε
-    public void parametros(){
+    // <parametros> ::= ( <lista_parametros> ) | ε
+    public void parametros() {
         if (token.getClasse() == Classe.parentesesEsquerdo) {
             token = lexico.nextToken();
-            lista_parametros();
+            if (token.getClasse() != Classe.parentesesDireito) { // Verifica se não é ε
+                lista_parametros();
+            }
             if (token.getClasse() == Classe.parentesesDireito) {
                 token = lexico.nextToken();
             } else {
@@ -222,20 +224,20 @@ public void programa(){
             }
         }
     }
-    
 
     // <lista_parametros> ::= <lista_id> : <tipo_var> {A06} <cont_lista_par>
     public void lista_parametros() {
-        lista_id();
+        lista_id(); // Chama para processar os identificadores
         if (token.getClasse() == Classe.doisPontos) {
             token = lexico.nextToken();
-            tipo_var();  // Usa o tipo_var já definido
+            tipo_var(); // Usa o tipo_var já definido
             // {A06} - Ação semântica pode ser inserida aqui
-            cont_lista_par();
+            cont_lista_par(); // Chama para processar parâmetros adicionais
         } else {
             System.err.println(token.getLinha() + "," + token.getColuna() + " - " + "Erro sintático: faltou dois pontos ( : ) após os identificadores de parâmetros");
         }
     }
+
  
     //<cont_lista_par> ::= ; <lista_parametros> | ε
     public void cont_lista_par() {
@@ -248,7 +250,7 @@ public void programa(){
     
     //<lista_id> ::= id {A07} <cont_lista_id>
     public void lista_id() {
-        if (token.getClasse() == Classe.indentificador) {
+        if (token.getClasse() == Classe.identificador) {
             token = lexico.nextToken();
             // {A07} - Ação associada ao identificador (pode ser semântica)
             cont_lista_id();  // Processa o resto da lista
@@ -275,7 +277,7 @@ public void programa(){
         }
     }
     
-    //<sentencas> ::= <comando> <mais_sentencas>
+    // <sentencas> ::= <comando> <mais_sentencas>
     public void sentencas() {
         comando();  // Processa o comando atual
         mais_sentencas();  // Processa mais comandos (se houver)
@@ -284,55 +286,64 @@ public void programa(){
     // <mais_sentencas> ::= ; <cont_sentencas>
     public void mais_sentencas() {
         if (token.getClasse() == Classe.pontoEVirgula) {
-            token = lexico.nextToken();
-            cont_sentencas();
-        } else {
-            System.err.println(token.getLinha() + "," + token.getColuna() + " - (mais_sentencas) Erro sintático: esperado ponto e vírgula ( ; ) entre sentenças");
+            token = lexico.nextToken();  // Avança para o próximo token
+            cont_sentencas();  // Processa mais sentenças
         }
+        // Se não houver ponto e vírgula, não há erro, pois a produção pode ser ε.
     }
 
     // <cont_sentencas> ::= <sentencas> | ε
     public void cont_sentencas() {
-        if (token.getClasse() != Classe.pontoEVirgula && token.getClasse() != Classe.palavraReservada) {
-            sentencas(); // Continua processando sentenças
+        // Permite continuar processando sentenças ou terminar
+        if (token.getClasse() != Classe.pontoEVirgula) {
+            sentencas(); // Continua processando sentenças, se houver
         }
+        // Se o token for ponto e vírgula, apenas finaliza aqui (ε é implícito)
     }
+
     
-    // <var_read> ::= id {A08} <mais_var_read>
-    public void var_read() {
-        if (token.getClasse() == Classe.indentificador) {
-            token = lexico.nextToken();
-            // {A08} - Ação associada à leitura da variável
-            mais_var_read();
-        } else {
-            System.err.println(token.getLinha() + "," + token.getColuna() + " - (var_read) Erro sintático: esperado identificador de variável para leitura");
-        }
+ // <var_read> ::= id {A08} <mais_var_read>
+public void var_read() {
+    if (token.getClasse() == Classe.identificador) {
+        token = lexico.nextToken();
+        // {A08} - Ação associada à leitura da variável
+        mais_var_read();
+    } else {
+        System.err.println(token.getLinha() + "," + token.getColuna() + " - (var_read) Erro sintático: esperado identificador de variável para leitura");
     }
+}
 
     // <mais_var_read> ::= , <var_read> | ε
     public void mais_var_read() {
         if (token.getClasse() == Classe.virgula) {
             token = lexico.nextToken();
-            var_read();
+            var_read();  // Chama var_read para processar a próxima variável
         }
     }
-    
+
     // <exp_write> ::= id {A09} <mais_exp_write> | string {A59} <mais_exp_write> | intnum {A43} <mais_exp_write>
     public void exp_write() {
-        if (token.getClasse() == Classe.indentificador) { // Verifica se é um identificador
-            token = lexico.nextToken();
-            // {A09} - Ação associada ao identificador
-            mais_exp_write();
-        } else if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("string")) { // Verifica se é a palavra reservada "string"
-            token = lexico.nextToken();
-            // {A59} - Ação associada à string
-            mais_exp_write();
-        } else if (token.getClasse() == Classe.numeroInteiro) { // Verifica se é um número inteiro
-            token = lexico.nextToken();
-            // {A43} - Ação associada ao número inteiro
-            mais_exp_write();
+        if ((token.getClasse() == Classe.identificador)
+                || (token.getClasse() == Classe.string)
+                || (token.getClasse() == Classe.numeroInteiro)) {
+
+            // <id> {A09} <mais_exp_write>
+            if (token.getClasse() == Classe.identificador) {
+                token = lexico.nextToken();
+                // {A09}
+                mais_exp_write();
+            } else if (token.getClasse() == Classe.string) {
+                token = lexico.nextToken();
+                // {A59}
+                mais_exp_write();
+            } else if (token.getClasse() == Classe.numeroInteiro) {
+                token = lexico.nextToken();
+                // {A43}
+                mais_exp_write();
+            }
         } else {
-            System.err.println(token.getLinha() + "," + token.getColuna() + " - (exp_write) Erro sintático: esperado identificador, 'string', ou número inteiro");
+            System.err.println(token.getLinha() + ", " + token.getColuna() +
+                    " - Identificador, ou string, ou numeroInteiro esperado ao ler a função exp_write()");
         }
     }
 
@@ -340,7 +351,7 @@ public void programa(){
     public void mais_exp_write() {
         if (token.getClasse() == Classe.virgula) {
             token = lexico.nextToken();
-            exp_write();
+            exp_write();  // Chama exp_write para processar a próxima expressão
         }
     }
 
@@ -398,7 +409,7 @@ public void programa(){
             }
         } else if (token.getClasse() == Classe.palavraReservada && token.getValor().getTexto().equalsIgnoreCase("for")) {
             token = lexico.nextToken();
-            if (token.getClasse() == Classe.indentificador) {
+            if (token.getClasse() == Classe.identificador) {
                 token = lexico.nextToken();
                 if (token.getClasse() == Classe.atribuicao) {
                     token = lexico.nextToken();
@@ -421,10 +432,10 @@ public void programa(){
                                 System.err.println(token.getLinha() + "," + token.getColuna() + " - (comando) Erro sintático: esperado 'begin'");
                             }
                         } else {
-                            System.err.println(token.getLinha() + "," + token.getColuna() + " - (comando) Erro sintático: esperado 'to'");
+                            System.err.println(token.getLinha() + "," + token.getColuna() + " - (comando) Erro sintático: esperado 'do'");
                         }
                     } else {
-                        System.err.println(token.getLinha() + "," + token.getColuna() + " - (comando) Erro sintático: esperado ':='");
+                        System.err.println(token.getLinha() + "," + token.getColuna() + " - (comando) Erro sintático: esperado 'to'");
                     }
                 } else {
                     System.err.println(token.getLinha() + "," + token.getColuna() + " - (comando) Erro sintático: esperado identificador");
@@ -514,7 +525,7 @@ public void programa(){
                 System.err.println(token.getLinha() + "," + token.getColuna() + " - (comando) Erro sintático: esperado '('");
             }
             pfalsa(); // Chama a função para processar <pfalsa>
-        } else if (token.getClasse() == Classe.indentificador) {
+        } else if (token.getClasse() == Classe.identificador) {
             token = lexico.nextToken();
             if (token.getClasse() == Classe.atribuicao) {
                 token = lexico.nextToken();
@@ -524,7 +535,7 @@ public void programa(){
                 System.err.println(token.getLinha() + "," + token.getColuna() + " - (comando) Erro sintático: esperado ':='");
             }
         } else {
-            chamada_procedimento(); // Chama a função para processar <chamada_procedimento>
+            //chamada_procedimento(); // Chama a função para processar <chamada_procedimento>
         }
     }
 
@@ -675,8 +686,68 @@ public void programa(){
         mais_expressao(); // Processa a continuação da expressão
     }
 
-    public void mais_expressao(){}
-    public void termo(){}
+    // <mais_expressao> ::= + <termo> {A37} <mais_expressao>  | - <termo> {A38} <mais_expressao>  | ε
+    public void mais_expressao() {
+        if (token.getClasse() == Classe.operadorSoma) { // Verifica se é o operador "+"
+            token = lexico.nextToken(); // Lê o próximo token
+            termo(); // Processa o termo
+            // Ação semântica A37 pode ser inserida aqui
+            mais_expressao(); // Processa a continuação da expressão
+        } else if (token.getClasse() == Classe.operadorSubtracao) { // Verifica se é o operador "-"
+            token = lexico.nextToken(); // Lê o próximo token
+            termo(); // Processa o termo
+            // Ação semântica A38 pode ser inserida aqui
+            mais_expressao(); // Processa a continuação da expressão
+        }
+        // ε (nenhuma ação, retorna vazia)
+    }
+
+
+    // <termo> ::= <fator> <mais_termo>
+    public void termo() {
+        fator(); // Processa o fator
+        mais_termo(); // Processa a continuação do termo
+    }
+
+    // <mais_termo> ::= * <fator> {A39} <mais_termo>  | / <fator> {A40} <mais_termo>  | ε
+    public void mais_termo() {
+        if (token.getClasse() == Classe.operadorMultiplicacao) { // Verifica se é o operador "*"
+            token = lexico.nextToken(); // Lê o próximo token
+            fator(); // Processa o fator
+            // Ação semântica A39 pode ser inserida aqui
+            mais_termo(); // Processa a continuação do termo
+        } else if (token.getClasse() == Classe.operadorDivisao) { // Verifica se é o operador "/"
+            token = lexico.nextToken(); // Lê o próximo token
+            fator(); // Processa o fator
+            // Ação semântica A40 pode ser inserida aqui
+            mais_termo(); // Processa a continuação do termo
+        }
+        // ε (nenhuma ação, retorna vazia)
+    }
+
+    // <fator> ::= <id> | <numero> | ( <expressao> )
+    public void fator() {
+        if (token.getClasse() == Classe.identificador) { // Verifica se o token é um identificador
+            token = lexico.nextToken(); // Lê o próximo token
+            // Aqui pode ser inserida a ação semântica, se necessária
+        } else if (token.getClasse() == Classe.numeroInteiro) { // Verifica se o token é um número inteiro
+            token = lexico.nextToken(); // Lê o próximo token
+            // Aqui pode ser inserida a ação semântica, se necessária
+        } else if (token.getClasse() == Classe.parentesesEsquerdo) { // Verifica o parêntese esquerdo
+            token = lexico.nextToken(); // Lê o próximo token
+            expressao(); // Processa a expressão dentro dos parênteses
+            if (token.getClasse() == Classe.parentesesDireito) { // Verifica o parêntese direito
+                token = lexico.nextToken(); // Lê o próximo token
+            } else {
+                // Erro: Esperado parêntese direito
+                System.err.println(token.getLinha() + "," + token.getColuna() + " - (fator) Erro sintático: esperado ')'.");
+            }
+        } else {
+            // Erro: Esperado identificador, número ou expressão entre parênteses
+            System.err.println(token.getLinha() + "," + token.getColuna() + " - (fator) Erro sintático: esperado identificador, número ou '('.");
+        }
+    }
+
 
     public void id_proc(){}
 
