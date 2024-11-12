@@ -1,7 +1,27 @@
 Program CalcularSalario;
-Var TempoEmAnos, ValorSalario, a, b, c : Integer; 
-Begin 
-    If (TempoEmAnos > 10) Then
+{Var TempoEmAnos, ValorSalario, a, b, c : Integer;} 
+Var termo1, termo2, aux, cont, quantos : Integer;
+Begin
+    writeln('----------FIBONACCI------------');
+    termo1 := 1;
+    termo2 := 1;
+    quantos := 0;
+    aux := 0;
+    write('Informe a quantidade de numeros que deseja ver da sequencia fibonacci: ');
+    read(quantos);
+    writeln(termo1);
+    writeln(termo2);
+    cont := 2;
+    while (cont <= quantos) do
+    begin
+        aux := termo1 + termo2;
+        writeln(aux);    
+        termo1 := termo2;
+        termo2 := aux;
+        cont := cont + 1; 
+    end; 
+
+    {If (TempoEmAnos > 10) Then
     Begin
         ValorSalario := 100; 
     End
@@ -31,5 +51,5 @@ Begin
     else
     begin
         writeln('Um dos valores não é positivo');
-    end;
-End
+    end;}
+End.

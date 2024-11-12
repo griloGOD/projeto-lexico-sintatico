@@ -1,7 +1,3 @@
-import lexico.Classe;
-import lexico.Lexico;
-import lexico.TabelaSimbolos;
-import lexico.Token;
 import sintatico.Sintatico;
 
 public class App {
